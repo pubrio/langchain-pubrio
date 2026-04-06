@@ -2,7 +2,7 @@
 
 LangChain tools for [Pubrio](https://pubrio.com) — the glocalized business data layer for AI agents and revenue teams. Search the whole market — not just the 30% in mainstream datasets.
 
-Give your LangChain agents access to companies, people, jobs, news, ads, and intent signals from around the globe.
+Give your LangChain agents access to companies, people, jobs, news, ads, monitors, and intent signals from around the globe.
 
 ## Installation
 
@@ -39,17 +39,32 @@ const result = await executor.invoke({
 console.log(result.output);
 ```
 
-## Available Tools (12)
+## Available Tools (50)
 
-### Company Tools
+### Company Tools (9)
 
 | Tool | Description |
 |------|-------------|
 | `PubrioCompanySearch` | Search companies by name, domain, location, industry, technology, headcount, revenue, keywords, and 20+ filters |
 | `PubrioCompanyLookup` | Look up a company by domain or LinkedIn URL |
 | `PubrioCompanyEnrich` | Enrich company with full firmographic data (uses credits) |
+| `PubrioCompanyLinkedInLookup` | Look up a company by its LinkedIn URL |
+| `PubrioFindSimilarCompanies` | Find lookalike companies with filters for location, industry, technology, and more |
+| `PubrioLookalikeLookup` | Look up lookalike company details by domain, LinkedIn URL, or domain_search_id |
+| `PubrioTechnologyLookup` | Look up technologies used by a company |
+| `PubrioJobSearch` | Search job postings across companies by title, location, keyword, and date |
+| `PubrioJobLookup` | Look up a specific job posting by job_search_id |
 
-### People Tools
+### News & Ads Tools (4)
+
+| Tool | Description |
+|------|-------------|
+| `PubrioNewsSearch` | Search company news and press releases by category, language, and date |
+| `PubrioNewsLookup` | Look up a specific news article by news_search_id |
+| `PubrioAdSearch` | Search company advertisements by search terms, headlines, locations, and dates |
+| `PubrioAdLookup` | Look up a specific advertisement by advertisement_search_id |
+
+### People Tools (7)
 
 | Tool | Description |
 |------|-------------|
@@ -58,15 +73,53 @@ console.log(result.output);
 | `PubrioPersonLinkedInLookup` | Real-time LinkedIn person lookup |
 | `PubrioPersonEnrich` | Enrich person with full professional details (uses credits) |
 | `PubrioRevealContact` | Reveal email (work/personal) or phone for a person (uses credits) |
+| `PubrioBatchRedeemContacts` | Batch redeem contact information for multiple people (uses credits) |
+| `PubrioQueryBatchRedeem` | Query the status of a batch redeem operation |
 
-### Signal Tools
+### Filter / Reference Data Tools (14)
 
 | Tool | Description |
 |------|-------------|
-| `PubrioJobSearch` | Search job postings across companies by title, location, keyword, and date |
-| `PubrioNewsSearch` | Search company news and press releases by category, language, and date |
-| `PubrioFindSimilarCompanies` | Find lookalike companies with filters for location, industry, technology, and more |
-| `PubrioTechnologyLookup` | Look up technologies used by a company |
+| `PubrioGetLocations` | Get the list of available locations for filtering |
+| `PubrioGetDepartments` | Get the list of available department titles for filtering |
+| `PubrioGetDepartmentFunctions` | Get the list of available department functions for filtering |
+| `PubrioGetManagementLevels` | Get the list of available management levels for filtering |
+| `PubrioGetCompanySizes` | Get the list of available company size ranges for filtering |
+| `PubrioGetTimezones` | Get the list of available timezones |
+| `PubrioGetNewsCategories` | Get the list of available news categories for filtering |
+| `PubrioGetNewsGalleries` | Get the list of available news galleries for filtering |
+| `PubrioGetNewsLanguages` | Get the list of available news languages for filtering |
+| `PubrioSearchTechnologies` | Search available technologies by keyword |
+| `PubrioSearchTechnologyCategories` | Search available technology categories by keyword |
+| `PubrioSearchVerticals` | Search available industry verticals by keyword |
+| `PubrioSearchVerticalCategories` | Search available vertical categories by keyword |
+| `PubrioSearchVerticalSubCategories` | Search available vertical sub-categories by keyword |
+
+### Monitor Tools (14)
+
+| Tool | Description |
+|------|-------------|
+| `PubrioCreateMonitor` | Create a new signal monitor for jobs, news, or advertisements |
+| `PubrioUpdateMonitor` | Update an existing monitor's settings |
+| `PubrioGetMonitor` | Get details of a specific monitor |
+| `PubrioListMonitors` | List all monitors with pagination |
+| `PubrioDeleteMonitor` | Delete a monitor |
+| `PubrioDuplicateMonitor` | Duplicate an existing monitor |
+| `PubrioTestRunMonitor` | Test run a monitor to preview results |
+| `PubrioRetryMonitor` | Retry a failed monitor execution |
+| `PubrioGetMonitorStats` | Get aggregate statistics for all monitors |
+| `PubrioGetMonitorLogs` | Get execution logs for a monitor |
+| `PubrioGetMonitorChart` | Get chart data for a monitor over a date range |
+| `PubrioGetMonitorLogDetail` | Get detailed information for a specific monitor log entry |
+| `PubrioValidateWebhook` | Validate a webhook URL for use with monitors |
+| `PubrioRevealMonitorSignature` | Reveal the signature of a monitor (uses credits) |
+
+### Profile Tools (2)
+
+| Tool | Description |
+|------|-------------|
+| `PubrioGetProfile` | Get the current user profile information |
+| `PubrioGetUsage` | Get the current API usage statistics |
 
 ## Tool Details
 
@@ -125,6 +178,22 @@ Or by LinkedIn URL:
 }
 ```
 
+### PubrioCreateMonitor
+
+Creates a signal monitor. Input is a JSON string:
+
+```json
+{
+  "name": "My Job Monitor",
+  "detection_mode": "new",
+  "signal_types": "jobs,news",
+  "destination_type": "webhook",
+  "webhook_url": "https://example.com/webhook",
+  "domains": "google.com,meta.com",
+  "frequency_minute": 60
+}
+```
+
 ## Example Use Cases
 
 - **AI sales agent**: Build an agent that researches prospects, finds decision-makers, and drafts personalized outreach
@@ -132,6 +201,7 @@ Or by LinkedIn URL:
 - **Market research assistant**: Ask the agent to analyze companies in a sector, their hiring trends, and news coverage
 - **Competitive intel bot**: Monitor competitor job postings, advertisements, and news automatically
 - **Account-based workflows**: Find lookalike companies, identify key people, and reveal their contact details
+- **Signal monitoring**: Set up automated monitors for job postings, news, and ads across target companies
 
 ## Authentication
 

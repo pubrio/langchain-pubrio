@@ -1,6 +1,6 @@
 {
 	"name": "@pubrio/langchain-tools",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"description": "LangChain tools for Pubrio — the glocalized business data layer for AI agents. Search companies, people, enrich records, and reveal contacts.",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
