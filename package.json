@@ -1,0 +1,42 @@
+{
+	"name": "@pubrio/langchain-tools",
+	"version": "1.0.0",
+	"description": "LangChain tools for Pubrio — the glocalized business data layer for AI agents. Search companies, people, enrich records, and reveal contacts.",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"license": "MIT",
+	"author": {
+		"name": "Pubrio",
+		"email": "support@pubrio.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/pubrio/langchain-pubrio.git"
+	},
+	"keywords": [
+		"langchain",
+		"pubrio",
+		"b2b",
+		"data-intelligence",
+		"company-search",
+		"people-search",
+		"enrichment",
+		"ai-tools"
+	],
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsc",
+		"prepublishOnly": "npm run build"
+	},
+	"dependencies": {
+		"@langchain/core": ">=0.2.0"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"devDependencies": {
+		"typescript": "^6.0.2"
+	}
+}
