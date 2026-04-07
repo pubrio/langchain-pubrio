@@ -20,7 +20,7 @@ function splitComma(value: unknown): string[] | undefined {
 export class PubrioCompanySearch extends Tool {
 	name = 'pubrio_search_companies';
 	description =
-		'Search B2B companies by name, domain, location, industry, technology, or headcount. Input: JSON with optional fields: company_name, companies (comma-separated), domains (comma-separated), linkedin_urls (comma-separated), locations (comma-separated), exclude_locations (comma-separated), places (comma-separated), exclude_places (comma-separated), job_locations (comma-separated), job_exclude_locations (comma-separated), job_posted_dates (comma-separated), job_titles (comma-separated), verticals (comma-separated), vertical_categories (comma-separated), vertical_sub_categories (comma-separated), categories (comma-separated), technologies (comma-separated), keywords (comma-separated), news_categories (comma-separated), news_published_dates (comma-separated), advertisement_search_terms (comma-separated), advertisement_target_locations (comma-separated), advertisement_exclude_target_locations (comma-separated), advertisement_start_dates (comma-separated), advertisement_end_dates (comma-separated), employees_min, employees_max, revenues_min, revenues_max, founded_dates_min, founded_dates_max, filter_conditions, is_enable_similarity_search, similarity_score, exclude_fields (comma-separated), page, per_page.';
+		'Search B2B companies by name, domain, location, industry, technology, or headcount. Input: JSON with optional fields: company_name, companies (comma-separated), domains (comma-separated), linkedin_urls (comma-separated), locations (comma-separated), exclude_locations (comma-separated), places (comma-separated), exclude_places (comma-separated), job_locations (comma-separated), job_exclude_locations (comma-separated), job_posted_dates (comma-separated), job_titles (comma-separated), verticals (comma-separated), vertical_categories (comma-separated), vertical_sub_categories (comma-separated), categories (comma-separated), technologies (comma-separated), keywords (comma-separated), news_categories (comma-separated), news_published_dates (comma-separated), news_galleries (comma-separated), news_gallery_ids (comma-separated), advertisement_search_terms (comma-separated), advertisement_target_locations (comma-separated), advertisement_exclude_target_locations (comma-separated), advertisement_start_dates (comma-separated), advertisement_end_dates (comma-separated), employees_min, employees_max, revenues_min, revenues_max, founded_dates_min, founded_dates_max, filter_conditions, is_enable_similarity_search, similarity_score, exclude_fields (comma-separated), page, per_page.';
 	private apiKey: string;
 
 	constructor(config: PubrioConfig) {
@@ -58,6 +58,8 @@ export class PubrioCompanySearch extends Tool {
 		if (params.news_categories) body.news_categories = splitComma(params.news_categories);
 		if (params.news_published_dates)
 			body.news_published_dates = splitComma(params.news_published_dates);
+		if (params.news_galleries) body.news_galleries = splitComma(params.news_galleries);
+		if (params.news_gallery_ids) body.news_gallery_ids = splitComma(params.news_gallery_ids);
 		if (params.advertisement_search_terms)
 			body.advertisement_search_terms = splitComma(params.advertisement_search_terms);
 		if (params.advertisement_target_locations)
@@ -851,7 +853,7 @@ export class PubrioSearchVerticalSubCategories extends Tool {
 export class PubrioCreateMonitor extends Tool {
 	name = 'pubrio_create_monitor';
 	description =
-		'Create a new signal monitor. Input: JSON with name (required), detection_mode (required - "new" or "new_and_updated"), signal_types (required, comma-separated: jobs, news, advertisements), destination_type (required - "webhook", "email", or "outreach_sequence"), and optional webhook_url, email, sequence_identifier, description, frequency_minute, max_daily_trigger, max_records_per_trigger, companies (comma-separated UUIDs), domains (comma-separated), linkedin_urls (comma-separated).';
+		'Create a new signal monitor. Input: JSON with name (required), detection_mode (required - "new" or "new_and_updated"), signal_types (required, comma-separated: jobs, news, advertisements), destination_type (required - "webhook", "email", or "outreach_sequence"), and optional webhook_url, email, sequence_identifier, description, frequency_minute, max_daily_trigger, max_records_per_trigger, companies (comma-separated UUIDs), domains (comma-separated), linkedin_urls (comma-separated), company_filters (JSON string), signal_filters (JSON array string), people_enrichment_configs (JSON array string), is_company_enrichment (boolean), is_people_enrichment (boolean), max_failure_trigger (number 1-10), max_retry_per_trigger (number 0-3), retry_delay_second (number 1-5), notification_email (string).';
 	private apiKey: string;
 
 	constructor(config: PubrioConfig) {
@@ -878,6 +880,31 @@ export class PubrioCreateMonitor extends Tool {
 		if (params.companies) body.companies = splitComma(params.companies);
 		if (params.domains) body.domains = splitComma(params.domains);
 		if (params.linkedin_urls) body.linkedin_urls = splitComma(params.linkedin_urls);
+		if (params.company_filters)
+			body.company_filters =
+				typeof params.company_filters === 'string'
+					? JSON.parse(params.company_filters as string)
+					: params.company_filters;
+		if (params.signal_filters)
+			body.signal_filters =
+				typeof params.signal_filters === 'string'
+					? JSON.parse(params.signal_filters as string)
+					: params.signal_filters;
+		if (params.people_enrichment_configs)
+			body.people_enrichment_configs =
+				typeof params.people_enrichment_configs === 'string'
+					? JSON.parse(params.people_enrichment_configs as string)
+					: params.people_enrichment_configs;
+		if (params.is_company_enrichment != null)
+			body.is_company_enrichment = params.is_company_enrichment;
+		if (params.is_people_enrichment != null)
+			body.is_people_enrichment = params.is_people_enrichment;
+		if (params.max_failure_trigger != null)
+			body.max_failure_trigger = params.max_failure_trigger;
+		if (params.max_retry_per_trigger != null)
+			body.max_retry_per_trigger = params.max_retry_per_trigger;
+		if (params.retry_delay_second != null) body.retry_delay_second = params.retry_delay_second;
+		if (params.notification_email) body.notification_email = params.notification_email;
 		const result = await pubrioRequest(this.apiKey, 'POST', '/monitors/create', body);
 		return JSON.stringify(result);
 	}
@@ -886,7 +913,7 @@ export class PubrioCreateMonitor extends Tool {
 export class PubrioUpdateMonitor extends Tool {
 	name = 'pubrio_update_monitor';
 	description =
-		'Update an existing monitor. Input: JSON with monitor_id (required) and optional name, description, detection_mode, signal_types (comma-separated), frequency_minute, max_daily_trigger, max_records_per_trigger, is_active (boolean), is_paused (boolean), notification_email, companies (comma-separated), domains (comma-separated), linkedin_urls (comma-separated).';
+		'Update an existing monitor. Input: JSON with monitor_id (required) and optional name, description, detection_mode, signal_types (comma-separated), frequency_minute, max_daily_trigger, max_records_per_trigger, is_active (boolean), is_paused (boolean), notification_email, companies (comma-separated), domains (comma-separated), linkedin_urls (comma-separated), company_filters (JSON string), signal_filters (JSON array string), people_enrichment_configs (JSON array string), is_company_enrichment (boolean), is_people_enrichment (boolean), max_failure_trigger (number), max_retry_per_trigger (number), retry_delay_second (number).';
 	private apiKey: string;
 
 	constructor(config: PubrioConfig) {
@@ -913,6 +940,30 @@ export class PubrioUpdateMonitor extends Tool {
 		if (params.companies) body.companies = splitComma(params.companies);
 		if (params.domains) body.domains = splitComma(params.domains);
 		if (params.linkedin_urls) body.linkedin_urls = splitComma(params.linkedin_urls);
+		if (params.company_filters)
+			body.company_filters =
+				typeof params.company_filters === 'string'
+					? JSON.parse(params.company_filters as string)
+					: params.company_filters;
+		if (params.signal_filters)
+			body.signal_filters =
+				typeof params.signal_filters === 'string'
+					? JSON.parse(params.signal_filters as string)
+					: params.signal_filters;
+		if (params.people_enrichment_configs)
+			body.people_enrichment_configs =
+				typeof params.people_enrichment_configs === 'string'
+					? JSON.parse(params.people_enrichment_configs as string)
+					: params.people_enrichment_configs;
+		if (params.is_company_enrichment != null)
+			body.is_company_enrichment = params.is_company_enrichment;
+		if (params.is_people_enrichment != null)
+			body.is_people_enrichment = params.is_people_enrichment;
+		if (params.max_failure_trigger != null)
+			body.max_failure_trigger = params.max_failure_trigger;
+		if (params.max_retry_per_trigger != null)
+			body.max_retry_per_trigger = params.max_retry_per_trigger;
+		if (params.retry_delay_second != null) body.retry_delay_second = params.retry_delay_second;
 		const result = await pubrioRequest(this.apiKey, 'POST', '/monitors/update', body);
 		return JSON.stringify(result);
 	}
