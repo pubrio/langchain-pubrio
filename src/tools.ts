@@ -17,10 +17,22 @@ function splitComma(value: unknown): string[] | undefined {
 		.filter(Boolean);
 }
 
+function toDateStr(value: unknown): string | undefined {
+	if (!value || typeof value !== 'string') return undefined;
+	return value.substring(0, 10);
+}
+
+function buildDateRange(from: unknown, to: unknown): string[] | undefined {
+	const f = toDateStr(from);
+	const t = toDateStr(to);
+	if (!f && !t) return undefined;
+	return [f || t!, t || f!];
+}
+
 export class PubrioCompanySearch extends Tool {
 	name = 'pubrio_search_companies';
 	description =
-		'Search B2B companies by name, domain, location, industry, technology, or headcount. Input: JSON with optional fields: company_name, companies (comma-separated), domains (comma-separated), linkedin_urls (comma-separated), locations (comma-separated), exclude_locations (comma-separated), places (comma-separated), exclude_places (comma-separated), job_locations (comma-separated), job_exclude_locations (comma-separated), job_posted_dates (comma-separated), job_titles (comma-separated), verticals (comma-separated), vertical_categories (comma-separated), vertical_sub_categories (comma-separated), categories (comma-separated), technologies (comma-separated), keywords (comma-separated), news_categories (comma-separated), news_published_dates (comma-separated), news_galleries (comma-separated), news_gallery_ids (comma-separated), advertisement_search_terms (comma-separated), advertisement_target_locations (comma-separated), advertisement_exclude_target_locations (comma-separated), advertisement_start_dates (comma-separated), advertisement_end_dates (comma-separated), employees_min, employees_max, revenues_min, revenues_max, founded_dates_min, founded_dates_max, filter_conditions, is_enable_similarity_search, similarity_score, exclude_fields (comma-separated), page, per_page.';
+		'Search B2B companies by name, domain, location, industry, technology, or headcount. Input: JSON with optional fields: company_name, companies (comma-separated), domains (comma-separated), linkedin_urls (comma-separated), locations (comma-separated ISO country codes), exclude_locations (comma-separated ISO country codes), places (comma-separated), exclude_places (comma-separated), job_locations (comma-separated ISO country codes), job_exclude_locations (comma-separated ISO country codes), job_posted_date_from (YYYY-MM-DD), job_posted_date_to (YYYY-MM-DD), job_titles (comma-separated), verticals (comma-separated vertical names), vertical_categories (comma-separated vertical category IDs), vertical_sub_categories (comma-separated vertical sub-category IDs), categories (comma-separated technology category IDs), technologies (comma-separated technology names), keywords (comma-separated), news_categories (comma-separated news category slugs), news_published_date_from (YYYY-MM-DD), news_published_date_to (YYYY-MM-DD), news_galleries (comma-separated), news_gallery_ids (comma-separated), advertisement_search_terms (comma-separated), advertisement_target_locations (comma-separated ISO country codes), advertisement_exclude_target_locations (comma-separated ISO country codes), advertisement_start_date_from (YYYY-MM-DD), advertisement_start_date_to (YYYY-MM-DD), advertisement_end_date_from (YYYY-MM-DD), advertisement_end_date_to (YYYY-MM-DD), employees_min, employees_max, revenues_min, revenues_max, founded_dates_min, founded_dates_max, filter_conditions, is_enable_similarity_search, similarity_score, exclude_fields (comma-separated), page, per_page.';
 	private apiKey: string;
 
 	constructor(config: PubrioConfig) {
@@ -45,7 +57,8 @@ export class PubrioCompanySearch extends Tool {
 		if (params.job_locations) body.job_locations = splitComma(params.job_locations);
 		if (params.job_exclude_locations)
 			body.job_exclude_locations = splitComma(params.job_exclude_locations);
-		if (params.job_posted_dates) body.job_posted_dates = splitComma(params.job_posted_dates);
+		const jobDates = buildDateRange(params.job_posted_date_from, params.job_posted_date_to);
+		if (jobDates) body.job_posted_dates = jobDates;
 		if (params.job_titles) body.job_titles = splitComma(params.job_titles);
 		if (params.verticals) body.verticals = splitComma(params.verticals);
 		if (params.vertical_categories)
@@ -56,8 +69,8 @@ export class PubrioCompanySearch extends Tool {
 		if (params.technologies) body.technologies = splitComma(params.technologies);
 		if (params.keywords) body.keywords = splitComma(params.keywords);
 		if (params.news_categories) body.news_categories = splitComma(params.news_categories);
-		if (params.news_published_dates)
-			body.news_published_dates = splitComma(params.news_published_dates);
+		const newsDates = buildDateRange(params.news_published_date_from, params.news_published_date_to);
+		if (newsDates) body.news_published_dates = newsDates;
 		if (params.news_galleries) body.news_galleries = splitComma(params.news_galleries);
 		if (params.news_gallery_ids) body.news_gallery_ids = splitComma(params.news_gallery_ids);
 		if (params.advertisement_search_terms)
@@ -68,10 +81,10 @@ export class PubrioCompanySearch extends Tool {
 			body.advertisement_exclude_target_locations = splitComma(
 				params.advertisement_exclude_target_locations,
 			);
-		if (params.advertisement_start_dates)
-			body.advertisement_start_dates = splitComma(params.advertisement_start_dates);
-		if (params.advertisement_end_dates)
-			body.advertisement_end_dates = splitComma(params.advertisement_end_dates);
+		const adStartDates = buildDateRange(params.advertisement_start_date_from, params.advertisement_start_date_to);
+		if (adStartDates) body.advertisement_start_dates = adStartDates;
+		const adEndDates = buildDateRange(params.advertisement_end_date_from, params.advertisement_end_date_to);
+		if (adEndDates) body.advertisement_end_dates = adEndDates;
 		if (params.employees_min != null || params.employees_max != null) {
 			body.employees = [params.employees_min ?? 1, params.employees_max ?? 1000000];
 		}
@@ -266,7 +279,7 @@ export class PubrioRevealContact extends Tool {
 export class PubrioJobSearch extends Tool {
 	name = 'pubrio_search_jobs';
 	description =
-		'Search job postings across companies. Input: JSON with optional fields: search_term, search_terms (comma-separated), titles (comma-separated), posted_dates (comma-separated), locations (comma-separated), exclude_locations (comma-separated), company_locations (comma-separated), companies (comma-separated), domains (comma-separated), linkedin_urls (comma-separated), page, per_page.';
+		'Search job postings across companies. Input: JSON with optional fields: search_term, search_terms (comma-separated), titles (comma-separated), posted_date_from (YYYY-MM-DD), posted_date_to (YYYY-MM-DD), locations (comma-separated ISO country codes), exclude_locations (comma-separated ISO country codes), company_locations (comma-separated ISO country codes), companies (comma-separated), domains (comma-separated), linkedin_urls (comma-separated), page, per_page.';
 	private apiKey: string;
 
 	constructor(config: PubrioConfig) {
@@ -283,7 +296,8 @@ export class PubrioJobSearch extends Tool {
 		if (params.search_term) body.search_term = params.search_term;
 		if (params.search_terms) body.search_terms = splitComma(params.search_terms);
 		if (params.titles) body.titles = splitComma(params.titles);
-		if (params.posted_dates) body.posted_dates = splitComma(params.posted_dates);
+		const postedDates = buildDateRange(params.posted_date_from, params.posted_date_to);
+		if (postedDates) body.posted_dates = postedDates;
 		if (params.locations) body.locations = splitComma(params.locations);
 		if (params.exclude_locations) body.exclude_locations = splitComma(params.exclude_locations);
 		if (params.company_locations) body.company_locations = splitComma(params.company_locations);
@@ -298,7 +312,7 @@ export class PubrioJobSearch extends Tool {
 export class PubrioNewsSearch extends Tool {
 	name = 'pubrio_search_news';
 	description =
-		'Search company news and press releases. Input: JSON with optional fields: search_term, search_terms (comma-separated), categories (comma-separated), published_dates (comma-separated), locations (comma-separated), company_locations (comma-separated), companies (comma-separated), domains (comma-separated), linkedin_urls (comma-separated), news_gallery_ids (comma-separated), news_galleries (comma-separated), news_languages (comma-separated), page, per_page.';
+		'Search company news and press releases. Input: JSON with optional fields: search_term, search_terms (comma-separated), categories (comma-separated), published_date_from (YYYY-MM-DD), published_date_to (YYYY-MM-DD), locations (comma-separated ISO country codes), company_locations (comma-separated ISO country codes), companies (comma-separated), domains (comma-separated), linkedin_urls (comma-separated), news_gallery_ids (comma-separated), news_galleries (comma-separated), news_languages (comma-separated), page, per_page.';
 	private apiKey: string;
 
 	constructor(config: PubrioConfig) {
@@ -315,7 +329,8 @@ export class PubrioNewsSearch extends Tool {
 		if (params.search_term) body.search_term = params.search_term;
 		if (params.search_terms) body.search_terms = splitComma(params.search_terms);
 		if (params.categories) body.categories = splitComma(params.categories);
-		if (params.published_dates) body.published_dates = splitComma(params.published_dates);
+		const pubDates = buildDateRange(params.published_date_from, params.published_date_to);
+		if (pubDates) body.published_dates = pubDates;
 		if (params.locations) body.locations = splitComma(params.locations);
 		if (params.company_locations) body.company_locations = splitComma(params.company_locations);
 		if (params.companies) body.companies = splitComma(params.companies);
@@ -332,7 +347,7 @@ export class PubrioNewsSearch extends Tool {
 export class PubrioFindSimilarCompanies extends Tool {
 	name = 'pubrio_find_similar_companies';
 	description =
-		'Find companies similar to a given company. Input: JSON with one of: domain_search_id, domain (e.g. "google.com"), or linkedin_url, plus optional page and per_page.';
+		'Find companies similar to a given company. Input: JSON with one of: domain_search_id, domain (e.g. "google.com"), or linkedin_url, plus optional filters: locations (comma-separated ISO country codes), exclude_locations (comma-separated ISO country codes), employees_min, employees_max, revenue_min, revenue_max, founded_year_start, founded_year_end, technologies (comma-separated technology names), categories (comma-separated technology category IDs), verticals (comma-separated vertical names), vertical_categories (comma-separated vertical category IDs), vertical_sub_categories (comma-separated vertical sub-category IDs), job_titles (comma-separated), job_locations (comma-separated ISO country codes), job_posted_date_from (YYYY-MM-DD), job_posted_date_to (YYYY-MM-DD), news_categories (comma-separated), news_published_date_from (YYYY-MM-DD), news_published_date_to (YYYY-MM-DD), is_enable_similarity_search, similarity_score, page, per_page.';
 	private apiKey: string;
 
 	constructor(config: PubrioConfig) {
@@ -350,6 +365,34 @@ export class PubrioFindSimilarCompanies extends Tool {
 		else if (params.domain) body.domain = params.domain;
 		else if (params.linkedin_url) body.linkedin_url = params.linkedin_url;
 		else body.domain = params.query;
+		// Comma-separated array fields
+		const commaFields = [
+			'locations', 'exclude_locations', 'technologies', 'categories',
+			'verticals', 'vertical_categories', 'vertical_sub_categories',
+			'job_titles', 'job_locations', 'news_categories',
+		];
+		for (const key of commaFields) {
+			if (params[key]) body[key] = splitComma(params[key]);
+		}
+		// Numeric range fields
+		if (params.employees_min != null || params.employees_max != null) {
+			body.employees = [params.employees_min ?? 1, params.employees_max ?? 1000000];
+		}
+		if (params.revenue_min != null || params.revenue_max != null) {
+			body.revenues = [params.revenue_min ?? 0, params.revenue_max ?? 100000000000];
+		}
+		if (params.founded_year_start != null || params.founded_year_end != null) {
+			body.founded_dates = [params.founded_year_start ?? 1900, params.founded_year_end ?? 2030];
+		}
+		// Date range fields
+		const jobDates = buildDateRange(params.job_posted_date_from, params.job_posted_date_to);
+		if (jobDates) body.job_posted_dates = jobDates;
+		const newsDates = buildDateRange(params.news_published_date_from, params.news_published_date_to);
+		if (newsDates) body.news_published_dates = newsDates;
+		// Boolean/numeric
+		if (params.is_enable_similarity_search != null)
+			body.is_enable_similarity_search = params.is_enable_similarity_search;
+		if (params.similarity_score != null) body.similarity_score = params.similarity_score;
 		const result = await pubrioRequest(
 			this.apiKey,
 			'POST',
@@ -454,7 +497,7 @@ export class PubrioNewsLookup extends Tool {
 export class PubrioAdSearch extends Tool {
 	name = 'pubrio_search_ads';
 	description =
-		'Search company advertisements. Input: JSON with optional fields: search_terms (comma-separated), headlines (comma-separated), target_locations (comma-separated), exclude_target_locations (comma-separated), start_dates (comma-separated), end_dates (comma-separated), company_locations (comma-separated), companies (comma-separated), domains (comma-separated), linkedin_urls (comma-separated), filter_conditions, page, per_page.';
+		'Search company advertisements. Input: JSON with optional fields: search_terms (comma-separated), headlines (comma-separated), target_locations (comma-separated ISO country codes), exclude_target_locations (comma-separated ISO country codes), start_date_from (YYYY-MM-DD), start_date_to (YYYY-MM-DD), end_date_from (YYYY-MM-DD), end_date_to (YYYY-MM-DD), company_locations (comma-separated ISO country codes), companies (comma-separated), domains (comma-separated), linkedin_urls (comma-separated), filter_conditions, page, per_page.';
 	private apiKey: string;
 
 	constructor(config: PubrioConfig) {
@@ -473,8 +516,10 @@ export class PubrioAdSearch extends Tool {
 		if (params.target_locations) body.target_locations = splitComma(params.target_locations);
 		if (params.exclude_target_locations)
 			body.exclude_target_locations = splitComma(params.exclude_target_locations);
-		if (params.start_dates) body.start_dates = splitComma(params.start_dates);
-		if (params.end_dates) body.end_dates = splitComma(params.end_dates);
+		const startDates = buildDateRange(params.start_date_from, params.start_date_to);
+		if (startDates) body.start_dates = startDates;
+		const endDates = buildDateRange(params.end_date_from, params.end_date_to);
+		if (endDates) body.end_dates = endDates;
 		if (params.company_locations) body.company_locations = splitComma(params.company_locations);
 		if (params.companies) body.companies = splitComma(params.companies);
 		if (params.domains) body.domains = splitComma(params.domains);
